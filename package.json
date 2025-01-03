@@ -1,0 +1,23 @@
+{
+  "name": "@code-visible/tslang",
+  "main": "index.js",
+  "version": "0.0.1",
+  "type": "module",
+  "author": "Challen Ai <fengyiai@gmail.com>",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/challenai/dipict.git"
+  },
+  "license": "GPL-3.0-only",
+  "scripts": {
+    "build": "bun run index.ts",
+    "lint": "eslint src/**"
+  },
+  "dependencies": {
+    "typescript": "^5.7.2"
+  },
+  "devDependencies": {
+    "@types/node": "^22.10.5",
+    "@types/bun": "latest"
+  }
+}
