@@ -1,4 +1,5 @@
-import { forEachChild, type Node, type SourceFile } from "typescript";
+import { forEachChild, SyntaxKind, type Node, type SourceFile } from "typescript";
+import { ASTParser } from "./astparser";
 // import * as file from "./protocol/file";
 
 export class Dir {
@@ -37,6 +38,11 @@ export class File {
   }
 
   traverse(node: Node) {
+    switch (node.kind) {
+      case SyntaxKind.ImportDeclaration:
+        ASTParser.parseImport(node);
+        break;
+    }
     forEachChild(node, this.traverse.bind(this));
   }
 
