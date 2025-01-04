@@ -1,3 +1,17 @@
+export class Call {
+  name: string;
+  pos: string;
+  typ: string;
+  signature: string;
+
+  constructor(name: string) {
+    this.name = name;
+    this.pos = "";
+    this.typ = "";
+    this.signature = "";
+  }
+};
+
 export class Function {
   name: string;
   params: string[];
@@ -17,18 +31,3 @@ export class Function {
     this.private = false;
   }
 };
-
-export class Call {
-  name: string;
-  pos: string;
-  typ: string;
-  signature: string;
-
-  constructor(name: string) {
-    this.name = name;
-    this.pos = "";
-    this.typ = "";
-    this.signature = "";
-  }
-};
-
