@@ -1,3 +1,6 @@
+import { forEachChild, type Node, type SourceFile } from "typescript";
+// import * as file from "./protocol/file";
+
 export class Dir {
   path: string;
   files: number;
@@ -29,5 +32,14 @@ export class File {
     this.error = "";
   }
 
-  parse() { }
+  parse(sourceFile: SourceFile) {
+    this.traverse(sourceFile);
+  }
+
+  traverse(node: Node) {
+    forEachChild(node, this.traverse.bind(this));
+  }
+
+  // TODO: dump
+  // dump(): file.SourceFile {}
 };
