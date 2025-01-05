@@ -21,6 +21,12 @@ export class Parser {
       case SyntaxKind.ImportDeclaration:
         this.parseImport(node);
         break;
+      case SyntaxKind.FunctionDeclaration:
+        this.parseFunction(node);
+        break;
+      case SyntaxKind.VariableDeclaration:
+        this.parseVariableFunction(node);
+        break;
     }
     forEachChild(node, this.parseNode.bind(this));
   }
@@ -30,5 +36,13 @@ export class Parser {
     currentPath = currentPath.replaceAll("\"", "");
     const relPath = join(this.dir, currentPath);
     this.imports.push(relPath);
+  }
+
+  parseFunction(node: Node) {
+    // TODO
+  }
+
+  parseVariableFunction(node: Node) {
+    // TODO
   }
 };

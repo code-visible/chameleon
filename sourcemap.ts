@@ -2,6 +2,7 @@ import { readdirSync, statSync } from "fs";
 import { Dir, File, Dep } from "./sourcecode";
 import { join } from "path";
 import { chdir } from "process";
+import type { Source } from "./protocol/map";
 
 export class Project {
   name: string;
@@ -23,6 +24,9 @@ export class Project {
   walk() {
     // if errors happen, exit the process immediately
     chdir(this.path);
+    const projectPath = statSync(this.directory);
+    if (!projectPath.isDirectory()) return;
+    this.dirs.set(this.directory, new Dir(this.directory));
     this.walkDirectory(this.directory);
   }
 
@@ -68,5 +72,28 @@ export class Project {
     if (this.deps.has(tsName)) return this.deps.get(tsName);
     if (this.deps.has(jsName)) return this.deps.get(jsName);
     return undefined;
+  }
+
+  dump(): Source {
+    const result: Source = {
+      name: this.name,
+      directory: this.directory,
+      pkgs: [],
+      files: [],
+      abstracts: [],
+      callables: [],
+      calls: [],
+      deps: [],
+    };
+    for (const d of this.dirs.values()) {
+      result.pkgs.push(d.dump());
+    }
+    for (const f of this.files.values()) {
+      if (f.ts || f.js) result.files.push(f.dump());
+    }
+    for (const d of this.deps.values()) {
+      result.deps.push(d.dump());
+    }
+    return result;
   }
 };

@@ -2,7 +2,9 @@ import { createSourceFile, forEachChild, ScriptTarget, SyntaxKind, type Node, ty
 import { Parser } from "./parser";
 import { readFileSync } from "fs";
 import { basename, dirname } from "path";
-// import * as file from "./protocol/file";
+import * as file from "./protocol/file";
+import * as dep from "./protocol/dep";
+import * as pkg from "./protocol/pkg";
 
 export type LookupDepFn = (name: string) => Dep | undefined;
 
@@ -18,6 +20,16 @@ export class Dep {
     this.typ = "file";
     this.ref = file;
   }
+
+  dump(): dep.SourceDep {
+    const result: dep.SourceDep = {
+      id: "",
+      name: this.name,
+      type: this.typ,
+      ref: "",
+    };
+    return result;
+  }
 };
 
 export class Dir {
@@ -29,6 +41,15 @@ export class Dir {
     this.path = path;
     this.files = 0;
     this.pkg = false;
+  }
+
+  dump(): pkg.SourcePkg {
+    const result: pkg.SourcePkg = {
+      id: "",
+      name: "",
+      path: this.path,
+    };
+    return result;
   }
 };
 
@@ -85,6 +106,15 @@ export class File {
   isSource(): boolean {
     return this.ts || this.js;
   }
-  // TODO: dump
-  // dump(): file.SourceFile {}
+
+  dump(): file.SourceFile {
+    const result: file.SourceFile = {
+      id: "",
+      name: this.name,
+      path: this.path,
+      pkg: "",
+      deps: [],
+    };
+    return result;
+  }
 };

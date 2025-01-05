@@ -5,6 +5,4 @@ export interface SourceCall {
   callee: string;
   file: string;
   type: string;
-  signature: string;
-  dep: string;
 };
