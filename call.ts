@@ -3,12 +3,14 @@ export class Call {
   pos: string;
   typ: string;
   signature: string;
+  file: string;
 
   constructor(name: string) {
     this.name = name;
     this.pos = "";
     this.typ = "";
     this.signature = "";
+    this.file = "";
   }
 };
 
@@ -18,6 +20,7 @@ export class Function {
   results: string[];
   pos: string;
   comment: string;
+  file: string;
   method: boolean;
   private: boolean;
 
@@ -27,6 +30,7 @@ export class Function {
     this.results = [];
     this.pos = "";
     this.comment = "";
+    this.file = "";
     this.method = false;
     this.private = false;
   }
