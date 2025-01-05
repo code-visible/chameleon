@@ -44,7 +44,7 @@ export class Project {
         this.walkDirectory(fullPath);
       } else {
         // handle files
-        const f = new File(fullPath, this.lookupDep.bind(this));
+        const f = new File(fullPath, this.lookupDir.bind(this), this.lookupDep.bind(this));
         this.files.set(fullPath, f);
         this.deps.set(fullPath, new Dep(f));
       }

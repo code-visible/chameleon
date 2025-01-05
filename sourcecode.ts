@@ -5,8 +5,11 @@ import { basename, dirname } from "path";
 import * as file from "./protocol/file";
 import * as dep from "./protocol/dep";
 import * as pkg from "./protocol/pkg";
+import { caculateHashID } from "./utils";
 
 export type LookupDepFn = (name: string) => Dep | undefined;
+
+export type LookupDirFn = (name: string) => Dir | undefined;
 
 export class Dep {
   id: string;
@@ -19,11 +22,12 @@ export class Dep {
     this.name = file.name;
     this.typ = "file";
     this.ref = file;
+    this.id = caculateHashID(`dep-${this.name}`);
   }
 
   dump(): dep.SourceDep {
     const result: dep.SourceDep = {
-      id: "",
+      id: this.id,
       name: this.name,
       type: this.typ,
       ref: "",
@@ -33,6 +37,7 @@ export class Dep {
 };
 
 export class Dir {
+  id: string;
   path: string;
   files: number;
   pkg: boolean;
@@ -41,11 +46,12 @@ export class Dir {
     this.path = path;
     this.files = 0;
     this.pkg = false;
+    this.id = caculateHashID(path);
   }
 
   dump(): pkg.SourcePkg {
     const result: pkg.SourcePkg = {
-      id: "",
+      id: this.id,
       name: "",
       path: this.path,
     };
@@ -54,6 +60,7 @@ export class Dir {
 };
 
 export class File {
+  id: string;
   path: string;
   name: string;
   dir: string;
@@ -64,10 +71,12 @@ export class File {
   error: string;
   deps: Map<string, Dep>;
   lookupDep: LookupDepFn;
+  lookupDir: LookupDirFn;
+  dirPtr?: Dir;
 
   private source?: SourceFile;
 
-  constructor(path: string, lookupDep: LookupDepFn) {
+  constructor(path: string, lookupDir: LookupDirFn, lookupDep: LookupDepFn) {
     this.path = path;
     this.name = basename(path);
     this.dir = dirname(path);
@@ -79,6 +88,9 @@ export class File {
     this.source = undefined;
     this.deps = new Map();
     this.lookupDep = lookupDep;
+    this.lookupDir = lookupDir;
+    // this.dirPtr = lookupDir();
+    this.id = caculateHashID(path);
     if (this.name.endsWith(".ts")) {
       this.ts = true;
     } else if (this.name.endsWith(".js")) {
@@ -109,7 +121,7 @@ export class File {
 
   dump(): file.SourceFile {
     const result: file.SourceFile = {
-      id: "",
+      id: this.id,
       name: this.name,
       path: this.path,
       pkg: "",
