@@ -1,11 +1,13 @@
-import { createSourceFile, forEachChild, ScriptTarget, SyntaxKind, type Node, type SourceFile } from "typescript";
+import { createSourceFile, ScriptTarget, type SourceFile } from "typescript";
 import { Parser } from "./parser";
 import { readFileSync } from "fs";
 import { basename, dirname } from "path";
+import { caculateHashID } from "./utils";
 import * as file from "./protocol/file";
 import * as dep from "./protocol/dep";
 import * as pkg from "./protocol/pkg";
-import { caculateHashID } from "./utils";
+import type { Call, Function } from "./call";
+import type { Abstract } from "./definition";
 
 export type LookupDepFn = (name: string) => Dep | undefined;
 
@@ -15,14 +17,13 @@ export class Dep {
   id: string;
   name: string;
   typ: string;
-  ref: File;
+  filePtr: File;
 
   constructor(file: File) {
-    this.id = "";
+    this.id = caculateHashID(`dep-${file.name}`);
     this.name = file.name;
     this.typ = "file";
-    this.ref = file;
-    this.id = caculateHashID(`dep-${this.name}`);
+    this.filePtr = file;
   }
 
   dump(): dep.SourceDep {
@@ -30,7 +31,7 @@ export class Dep {
       id: this.id,
       name: this.name,
       type: this.typ,
-      ref: "",
+      ref: this.filePtr ? this.filePtr.id : "",
     };
     return result;
   }
@@ -69,6 +70,9 @@ export class File {
   json: boolean;
   test: boolean;
   error: string;
+  fns: Map<string, Function>;
+  abs: Map<string, Abstract>;
+  calls: Call[];
   deps: Map<string, Dep>;
   lookupDep: LookupDepFn;
   lookupDir: LookupDirFn;
@@ -85,11 +89,14 @@ export class File {
     this.json = false;
     this.test = false;
     this.error = "";
+    this.fns = new Map();
+    this.abs = new Map();
+    this.calls = [];
     this.source = undefined;
     this.deps = new Map();
     this.lookupDep = lookupDep;
     this.lookupDir = lookupDir;
-    // this.dirPtr = lookupDir();
+    this.dirPtr = lookupDir(this.dir);
     this.id = caculateHashID(path);
     if (this.name.endsWith(".ts")) {
       this.ts = true;
@@ -109,6 +116,13 @@ export class File {
       const dep = this.lookupDep(name);
       if (dep) this.deps.set(name, dep);
     }
+    this.fns = parser.fns;
+    for (const fn of parser.fns.values()) {
+      fn.file = this.id;
+      if (this.dirPtr) {
+        fn.dir = this.dirPtr.id;
+      }
+    }
   }
 
   private loadFromDisk(): string {
@@ -123,10 +137,13 @@ export class File {
     const result: file.SourceFile = {
       id: this.id,
       name: this.name,
-      path: this.path,
-      pkg: "",
+      path: this.dir,
+      pkg: this.dirPtr ? this.dirPtr.id : "",
       deps: [],
     };
+    for (const dep of this.deps.values()) {
+      result.deps.push(dep.id);
+    }
     return result;
   }
 };
