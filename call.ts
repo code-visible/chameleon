@@ -1,4 +1,5 @@
 import * as callable from "./protocol/callable";
+import { caculateHashID } from "./utils";
 
 export class Call {
   name: string;
@@ -17,7 +18,6 @@ export class Call {
 };
 
 export class Function {
-  id: string;
   name: string;
   params: string[];
   results: string[];
@@ -25,27 +25,33 @@ export class Function {
   comment: string;
   dir: string;
   file: string;
+  fileIdent: string;
   method: boolean;
   private: boolean;
   abstract: string;
 
   constructor(name: string, abstract?: string) {
-    this.id = "";
     this.name = name;
     this.params = [];
     this.results = [];
     this.pos = "";
     this.comment = "";
     this.file = "";
+    this.fileIdent = "";
     this.dir = "";
     this.method = abstract ? true : false;
     this.private = false;
     this.abstract = abstract || "";
   }
 
+  getID(): string {
+    if (this.method) return caculateHashID(`${this.fileIdent}:${this.abstract}.${this.name}`)
+    return caculateHashID(`${this.fileIdent}:${this.name}`);
+  }
+
   dump(): callable.SourceCallable {
     const result: callable.SourceCallable = {
-      id: this.id,
+      id: this.getID(),
       pos: "",
       name: this.name,
       signature: "",

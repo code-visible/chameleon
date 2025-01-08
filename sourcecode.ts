@@ -14,31 +14,35 @@ export type LookupDepFn = (name: string) => Dep | undefined;
 export type LookupDirFn = (name: string) => Dir | undefined;
 
 export class Dep {
-  id: string;
+  ident: string;
   name: string;
   typ: string;
   filePtr: File;
 
   constructor(file: File) {
-    this.id = caculateHashID(`dep-${file.name}`);
+    this.ident = `dep-${file.name}`;
     this.name = file.name;
     this.typ = "file";
     this.filePtr = file;
   }
 
+  getID(): string {
+    return caculateHashID(this.ident);
+  }
+
   dump(): dep.SourceDep {
     const result: dep.SourceDep = {
-      id: this.id,
+      id: this.getID(),
       name: this.name,
       type: this.typ,
-      ref: this.filePtr ? this.filePtr.id : "",
+      ref: this.filePtr ? this.filePtr.getID() : "",
     };
     return result;
   }
 };
 
 export class Dir {
-  id: string;
+  ident: string;
   path: string;
   files: number;
   pkg: boolean;
@@ -47,12 +51,16 @@ export class Dir {
     this.path = path;
     this.files = 0;
     this.pkg = false;
-    this.id = caculateHashID(path);
+    this.ident = path;
+  }
+
+  getID(): string {
+    return caculateHashID(this.ident);
   }
 
   dump(): pkg.SourcePkg {
     const result: pkg.SourcePkg = {
-      id: this.id,
+      id: this.getID(),
       name: "",
       path: this.path,
     };
@@ -61,7 +69,7 @@ export class Dir {
 };
 
 export class File {
-  id: string;
+  ident: string;
   path: string;
   name: string;
   dir: string;
@@ -81,6 +89,7 @@ export class File {
   private source?: SourceFile;
 
   constructor(path: string, lookupDir: LookupDirFn, lookupDep: LookupDepFn) {
+    this.ident = path;
     this.path = path;
     this.name = basename(path);
     this.dir = dirname(path);
@@ -97,7 +106,6 @@ export class File {
     this.lookupDep = lookupDep;
     this.lookupDir = lookupDir;
     this.dirPtr = lookupDir(this.dir);
-    this.id = caculateHashID(path);
     if (this.name.endsWith(".ts")) {
       this.ts = true;
     } else if (this.name.endsWith(".js")) {
@@ -118,11 +126,14 @@ export class File {
     }
     this.fns = parser.fns;
     for (const fn of parser.fns.values()) {
-      fn.file = this.id;
-      if (this.dirPtr) {
-        fn.dir = this.dirPtr.id;
-      }
+      this.completeFunction(fn);
     }
+  }
+
+  completeFunction(fn: Function) {
+    fn.file = this.getID();
+    fn.dir = this.getDirID();
+    fn.fileIdent = this.ident;
   }
 
   private loadFromDisk(): string {
@@ -133,16 +144,25 @@ export class File {
     return this.ts || this.js;
   }
 
+  getID(): string {
+    return caculateHashID(this.ident);
+  }
+
+  getDirID(): string {
+    if (this.dirPtr) return this.dirPtr.getID();
+    return "";
+  }
+
   dump(): file.SourceFile {
     const result: file.SourceFile = {
-      id: this.id,
+      id: this.getID(),
       name: this.name,
       path: this.dir,
-      pkg: this.dirPtr ? this.dirPtr.id : "",
+      pkg: this.dirPtr ? this.dirPtr.getID() : "",
       deps: [],
     };
     for (const dep of this.deps.values()) {
-      result.deps.push(dep.id);
+      result.deps.push(dep.getID());
     }
     return result;
   }
