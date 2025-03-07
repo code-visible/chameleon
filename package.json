@@ -10,7 +10,8 @@
   },
   "license": "GPL-3.0-only",
   "scripts": {
-    "build": "bun run index.ts",
+    "dev": "bun main.ts",
+    "build": "bun build main.ts",
     "lint": "eslint src/**"
   },
   "dependencies": {

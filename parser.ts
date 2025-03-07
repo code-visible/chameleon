@@ -75,7 +75,7 @@ export class Parser {
   }
 
   parseCall(node: Node) {
-    console.log("=------", this.fn, node.kind, node.getText(this.sourceFile));
+    // console.log("=------", this.fn, node.kind, node.getText(this.sourceFile));
   }
 
   parseMethod(node: Node) {

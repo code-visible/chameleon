@@ -1,6 +1,11 @@
+import path from "path";
 import { Project } from "./sourcemap";
 
-const res = new Project("hello", ".", "testdata");
+const p = new Project("depict", "testdata/depict", ".");
+const distDir = "dist";
 
-res.walk();
-res.parseAllFiles();
+p.walk();
+p.parseAllFiles();
+const d = p.dump();
+
+await Bun.write(path.join(distDir, `${p.name}.json`), JSON.stringify(d));

@@ -3,5 +3,6 @@ export interface SourceFile {
   name: string;
   path: string;
   pkg: string;
+  imports: string[];
   deps: string[];
 };

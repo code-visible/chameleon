@@ -1,13 +1,13 @@
 import { createSourceFile, ScriptTarget, type SourceFile } from "typescript";
 import { Parser } from "./parser";
-import { readFileSync } from "fs";
 import { basename, dirname } from "path";
-import { caculateHashID } from "./utils";
+import { caculateHashID, getNameFromPath, normalizePath } from "./utils";
 import * as file from "./protocol/file";
 import * as dep from "./protocol/dep";
 import * as pkg from "./protocol/pkg";
 import type { Call, Function } from "./call";
 import type { Abstract } from "./definition";
+import { readFileSync } from "fs";
 
 export type LookupDepFn = (name: string) => Dep | undefined;
 
@@ -46,12 +46,14 @@ export class Dir {
   path: string;
   files: number;
   pkg: boolean;
+  imps: Map<string, Dir>;
 
   constructor(path: string) {
     this.path = path;
     this.files = 0;
     this.pkg = false;
     this.ident = path;
+    this.imps = new Map();
   }
 
   getID(): string {
@@ -59,11 +61,16 @@ export class Dir {
   }
 
   dump(): pkg.SourcePkg {
+    const dumpPath = normalizePath(this.path);
     const result: pkg.SourcePkg = {
       id: this.getID(),
-      name: "",
-      path: this.path,
+      name: getNameFromPath(dumpPath),
+      path: dumpPath,
+      imports: [],
     };
+    for (const i of this.imps.values()) {
+      result.imports.push(i.getID());
+    }
     return result;
   }
 };
@@ -80,6 +87,7 @@ export class File {
   error: string;
   fns: Map<string, Function>;
   abs: Map<string, Abstract>;
+  imps: Map<string, File>;
   calls: Call[];
   deps: Map<string, Dep>;
   lookupDep: LookupDepFn;
@@ -100,6 +108,7 @@ export class File {
     this.error = "";
     this.fns = new Map();
     this.abs = new Map();
+    this.imps = new Map();
     this.calls = [];
     this.source = undefined;
     this.deps = new Map();
@@ -128,6 +137,22 @@ export class File {
     for (const fn of parser.fns.values()) {
       this.completeFunction(fn);
     }
+
+    for (const dep of this.deps.values()) {
+      this.connectDependencies(dep);
+    }
+  }
+
+  connectDependencies(dep: Dep) {
+    if (dep.typ === "file") {
+      const target = dep.filePtr;
+      this.imps.set(target.ident, target);
+      const srcDir = this.dirPtr;
+      const targetDir = target.dirPtr;
+      if (srcDir && targetDir && srcDir !== targetDir) {
+        srcDir.imps.set(targetDir.ident, targetDir);
+      }
+    }
   }
 
   completeFunction(fn: Function) {
@@ -154,15 +179,20 @@ export class File {
   }
 
   dump(): file.SourceFile {
+    const dumpPath = normalizePath(this.dir);
     const result: file.SourceFile = {
       id: this.getID(),
       name: this.name,
-      path: this.dir,
+      path: dumpPath,
       pkg: this.dirPtr ? this.dirPtr.getID() : "",
+      imports: [],
       deps: [],
     };
     for (const dep of this.deps.values()) {
       result.deps.push(dep.getID());
+    }
+    for (const i of this.imps.values()) {
+      result.imports.push(i.getID());
     }
     return result;
   }

@@ -1,4 +1,4 @@
-import { fstat, readdirSync, statSync } from "fs";
+import { readdirSync, statSync } from "fs";
 import { Dir, File, Dep } from "./sourcecode";
 import { join } from "path";
 import { chdir } from "process";
@@ -77,8 +77,9 @@ export class Project {
   dump(): Source {
     const result: Source = {
       name: this.name,
-      directory: this.directory,
-      language: "javascript",
+      lang: "Javascript",
+      repository: "",
+      version: "",
       pkgs: [],
       files: [],
       abstracts: [],
@@ -91,7 +92,8 @@ export class Project {
     }
     for (const f of this.files.values()) {
       if (f.ts || f.js || f.json) {
-        result.files.push(f.dump());
+        const fileDump = f.dump();
+        result.files.push(fileDump);
         if (f.ts || f.js) {
           for (const fn of f.fns.values()) {
             result.callables.push(fn.dump());
@@ -102,6 +104,7 @@ export class Project {
     for (const d of this.deps.values()) {
       result.deps.push(d.dump());
     }
+
     return result;
   }
 };
