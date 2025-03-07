@@ -6,7 +6,7 @@
   "author": "Challen Ai <fengyiai@gmail.com>",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/challenai/dipict.git"
+    "url": "git+https://github.com/challenai/tslang.git"
   },
   "license": "GPL-3.0-only",
   "scripts": {
