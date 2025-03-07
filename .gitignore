@@ -132,3 +132,4 @@ dist
 testdata
 .vscode
 bun.lockb
+bun.lock
