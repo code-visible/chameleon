@@ -8,12 +8,16 @@ import type { SourcePkg } from "./pkg";
 export interface Source {
   name: string;
   lang: string;
+  parser: string;
+  timestamp: string;
   repository: string;
+  typ: string;
   version: string;
   pkgs: SourcePkg[];
   files: SourceFile[];
-  abstracts: SourceAbstract[];
-  callables: SourceCallable[];
+  absts: SourceAbstract[];
+  fns: SourceCallable[];
   calls: SourceCall[];
+  refs: SourceCall[];
   deps: SourceDep[];
 };
