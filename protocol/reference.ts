@@ -1,6 +1,5 @@
 export interface SourceCall {
-  id: string;
-  pos: string;
-  file: string;
-};
-  
+    id: string;
+    pos: string;
+    file: string;
+}
