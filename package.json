@@ -12,13 +12,15 @@
   "scripts": {
     "dev": "bun main.ts",
     "build": "bun build main.ts",
-    "lint": "eslint src/**"
+    "lint": "biome lint --write *.ts protocol/*",
+    "format": "biome format --write *.ts protocol/*"
   },
   "dependencies": {
     "typescript": "^5.7.2"
   },
   "devDependencies": {
-    "@types/node": "^22.10.5",
-    "@types/bun": "latest"
+    "@biomejs/biome": "1.9.4",
+    "@types/bun": "latest",
+    "@types/node": "^22.10.5"
   }
 }

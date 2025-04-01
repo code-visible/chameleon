@@ -6,18 +6,18 @@ import type { SourceFile } from "./file";
 import type { SourcePkg } from "./pkg";
 
 export interface Source {
-  name: string;
-  lang: string;
-  parser: string;
-  timestamp: string;
-  repository: string;
-  typ: string;
-  version: string;
-  pkgs: SourcePkg[];
-  files: SourceFile[];
-  absts: SourceAbstract[];
-  fns: SourceCallable[];
-  calls: SourceCall[];
-  refs: SourceCall[];
-  deps: SourceDep[];
-};
+    name: string;
+    lang: string;
+    parser: string;
+    timestamp: string;
+    repository: string;
+    typ: string;
+    version: string;
+    pkgs: SourcePkg[];
+    files: SourceFile[];
+    absts: SourceAbstract[];
+    fns: SourceCallable[];
+    calls: SourceCall[];
+    refs: SourceCall[];
+    deps: SourceDep[];
+}
