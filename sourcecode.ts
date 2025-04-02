@@ -1,6 +1,6 @@
 import { readFileSync } from "node:fs";
 import { basename } from "node:path";
-import { createSourceFile, ScriptTarget, type SourceFile } from "typescript";
+import { ScriptTarget, type SourceFile, createSourceFile } from "typescript";
 import type { Call, Callable } from "./call";
 import type { Abstract } from "./definition";
 import { Parser } from "./parser";
@@ -92,10 +92,16 @@ export class File {
     calls: Call[];
     deps: Map<string, Dep>;
     lookupDep: LookupDepFn;
+    registry: Map<string, string>;
 
     private source?: SourceFile;
 
-    constructor(path: string, dir: Dir, lookupDep: LookupDepFn) {
+    constructor(
+        path: string,
+        dir: Dir,
+        lookupDep: LookupDepFn,
+        registry: Map<string, string>,
+    ) {
         this.ident = path;
         this.path = path;
         this.name = basename(path);
@@ -111,8 +117,13 @@ export class File {
         this.calls = [];
         this.source = undefined;
         this.lookupDep = lookupDep;
+        this.registry = registry;
         this.deps = new Map();
-        if (this.name.endsWith(".ts")) {
+        if (
+            this.name.endsWith(".ts") &&
+            !this.name.endsWith(".d.ts") &&
+            !this.name.endsWith(".dts")
+        ) {
             this.ts = true;
         } else if (this.name.endsWith(".js")) {
             this.js = true;
@@ -128,9 +139,9 @@ export class File {
             sourceData,
             ScriptTarget.ES2015,
         );
-        const parser = new Parser(this.dir.path, this.source);
+        const parser = new Parser(this.dir.path, this.source, this.registry);
         parser.parseSource();
-        for (const name of parser.imports) {
+        for (const name of parser.imports.values()) {
             const dep = this.lookupDep(name);
             if (dep) this.deps.set(name, dep);
         }
