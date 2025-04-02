@@ -10,10 +10,12 @@ export class Project {
     name: string;
     path: string;
     directory: string;
-    registry: Map<string, Dir>;
+    registry: Map<string, string>;
     dirs: Map<string, Dir>;
     files: Map<string, File>;
     deps: Map<string, Dep>;
+    excludes: Set<string>;
+    allowDot: boolean;
 
     constructor(
         name: string,
@@ -28,9 +30,21 @@ export class Project {
         this.dirs = new Map();
         this.files = new Map();
         this.deps = new Map();
+        this.excludes = new Set();
+        this.allowDot = true;
+
+        const excludesList = excludes.split(",");
+        for (const excl of excludesList) {
+            const excl_ = excl.trim();
+            if (excl_ === ".*") {
+                this.allowDot = false;
+            } else {
+                this.excludes.add(join(excl_));
+            }
+        }
     }
 
-    async walk() {
+    async scanRepository() {
         // if errors happen, exit the process immediately
         chdir(this.path);
         const projectPath = statSync(this.directory);
@@ -45,12 +59,18 @@ export class Project {
         const entries = readdirSync(dir);
         for (const entry of entries) {
             const fullPath = join(dir, entry);
-            const stats = statSync(fullPath);
+            if (this.excludes.has(fullPath)) {
+                continue;
+            }
+            if (!this.allowDot && entry.startsWith(".")) {
+                continue;
+            }
 
+            const stats = statSync(fullPath);
             if (stats.isDirectory()) {
                 // handle directories
                 this.dirs.set(fullPath, new Dir(fullPath));
-                this.walkDirectory(fullPath);
+                await this.walkDirectory(fullPath);
             } else {
                 // handle files
                 const dir = this.lookupDir(dirname(fullPath));
@@ -58,12 +78,13 @@ export class Project {
                     if (entry.endsWith(packageName)) {
                         dir.pkg = true;
                         const name = await this.retrivePackageName(fullPath);
-                        if (name) this.registry.set(name, dir);
+                        if (name) this.registry.set(name, dir.path);
                     }
                     const f = new File(
                         fullPath,
                         dir,
                         this.lookupDep.bind(this),
+                        this.registry,
                     );
                     this.files.set(fullPath, f);
                     this.deps.set(fullPath, new Dep(f));
@@ -93,10 +114,14 @@ export class Project {
     }
 
     lookupDep(name: string): Dep | undefined {
-        const tsName = `${name}.ts`;
-        const jsName = `${name}.js`;
-        if (this.deps.has(tsName)) return this.deps.get(tsName);
-        if (this.deps.has(jsName)) return this.deps.get(jsName);
+        if (!name.endsWith(".ts") && !name.endsWith(".js")) {
+            const tsName = `${name}.ts`;
+            const jsName = `${name}.js`;
+            if (this.deps.has(tsName)) return this.deps.get(tsName);
+            if (this.deps.has(jsName)) return this.deps.get(jsName);
+            return undefined;
+        }
+        if (this.deps.has(name)) return this.deps.get(name);
         return undefined;
     }
 
