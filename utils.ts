@@ -20,11 +20,11 @@ export const getPrefixPathFromPath = (path: string): string => {
 };
 
 export const normalizePath = (path: string): string => {
-    path = path.trim();
-    if (!path.startsWith("/")) path = "/" + path;
-    for (let n = path.length - 1; n >= 0; n--) {
-        const ch = path.charAt(n);
-        if (ch !== "/" && ch !== ".") return path.substring(0, n + 1);
+    let path_ = path.trim();
+    if (!path_.startsWith("/")) path_ = `/${path}`;
+    for (let n = path_.length - 1; n >= 0; n--) {
+        const ch = path_.charAt(n);
+        if (ch !== "/" && ch !== ".") return path_.slice(0, n + 1);
     }
     return "/";
 };

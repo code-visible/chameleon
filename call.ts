@@ -17,7 +17,7 @@ export class Call {
     }
 }
 
-export class Function {
+export class Callable {
     name: string;
     params: string[];
     results: string[];
@@ -39,7 +39,7 @@ export class Function {
         this.file = "";
         this.fileIdent = "";
         this.dir = "";
-        this.method = abstract ? true : false;
+        this.method = !!abstract;
         this.private = false;
         this.abstract = abstract || "";
     }
