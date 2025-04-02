@@ -30,9 +30,9 @@ export class Callable {
     private: boolean;
     abstract: string;
 
-    constructor(name: string, abstract?: string) {
+    constructor(name: string, params: string[], abstract?: string) {
         this.name = name;
-        this.params = [];
+        this.params = params;
         this.results = [];
         this.pos = "";
         this.comment = "";
