@@ -64,6 +64,7 @@ export class Parser {
         }
         for (const [alias, pkg] of this.pkgs.entries()) {
             if (alias === p) return pkg;
+            // is it safe for different platforms ?
             const alias_ = `${alias}/`;
             if (p.startsWith(alias_)) {
                 return join(pkg, p.slice(alias_.length));
@@ -109,6 +110,7 @@ export class Parser {
             const id = node.name.text;
             this.fns.set(id, new Callable(id, []));
         }
+        // TODO: refactor legacy parse impl
         // let start = false;
         // const fn = [];
         // for (const el of node.getChildren(this.sourceFile)) {
@@ -137,6 +139,7 @@ export class Parser {
         // TODO
     }
 
+    // it doesn't work in some cases
     // parseMethod(node: ts.Node) {
     //     const fn = [];
     //     for (const el of node.getChildren(this.sourceFile)) {
@@ -187,7 +190,6 @@ export class Parser {
                 ts.isStringLiteral(decl.initializer.arguments[0])
             ) {
                 const importPath = decl.initializer.arguments[0].text;
-                // console.log("============", importPath);
                 const localPath = this.normalizeImportPath(importPath);
                 if (ts.isIdentifier(decl.name)) {
                     this.imports.set(decl.name.text, localPath);
@@ -198,7 +200,7 @@ export class Parser {
 
     searchMethod(abst: string, member: ts.ClassElement) {
         if (ts.isMethodDeclaration(member) && ts.isIdentifier(member.name)) {
-            // TODO
+            // TODO: avoid broken parameters
             // const params = member.parameters.map((param) =>
             //     param.name.getText(),
             // );
