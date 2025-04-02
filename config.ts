@@ -1,4 +1,4 @@
-import { parseArgs } from "util";
+import { parseArgs } from "node:util";
 
 export interface Config {
     name: string;
@@ -55,9 +55,9 @@ export function parseConfig(): Config {
     const minifyStr = values.minify.toString();
     const minify =
         minifyStr !== "" &&
-        minifyStr != "false" &&
-        minifyStr != "False" &&
-        minifyStr != "0";
+        minifyStr !== "false" &&
+        minifyStr !== "False" &&
+        minifyStr !== "0";
 
     return {
         name: values.name.toString(),

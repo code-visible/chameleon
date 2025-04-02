@@ -17,7 +17,7 @@ export class Call {
     }
 }
 
-export class Function {
+export class Callable {
     name: string;
     params: string[];
     results: string[];
@@ -30,16 +30,16 @@ export class Function {
     private: boolean;
     abstract: string;
 
-    constructor(name: string, abstract?: string) {
+    constructor(name: string, params: string[], abstract?: string) {
         this.name = name;
-        this.params = [];
+        this.params = params;
         this.results = [];
         this.pos = "";
         this.comment = "";
         this.file = "";
         this.fileIdent = "";
         this.dir = "";
-        this.method = abstract ? true : false;
+        this.method = !!abstract;
         this.private = false;
         this.abstract = abstract || "";
     }
