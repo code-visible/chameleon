@@ -7,6 +7,7 @@ export function caculateHashID(info: string): string {
 }
 
 export function getNameFromPath(path: string): string {
+    if (path === "" || path === "/") return "/";
     for (let i = path.length - 1; i >= 0; i--) {
         if (path.charAt(i) === "/") return path.substring(i + 1);
     }
