@@ -66,7 +66,6 @@ export class Callable {
             results: [],
             method: this.method,
             private: false,
-            orphan: false,
             // pkg: this.dirPtr ? this.dirPtr.id : "",
             // deps: [],
         };

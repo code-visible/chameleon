@@ -11,5 +11,4 @@ export interface SourceCallable {
     results: string[];
     method: boolean;
     private: boolean;
-    orphan: boolean;
 }
